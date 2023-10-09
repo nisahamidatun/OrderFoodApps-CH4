@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_nav_graph"
+    app:startDestination="@id/navigation_home">
+
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="com.learning.orderfoodappsch3.presentation.ui.orderfoodhome.OrderFoodHomeFragment"
+        android:label="OrderFoodHomeFragment"
+        tools:layout="@layout/fragment_order_food_home">
+        <action
+            android:id="@+id/action_orderFoodHomeFragment_to_profileFragment"
+            app:destination="@id/navigation_profile" />
+        <action
+            android:id="@+id/action_orderFoodHomeFragment_to_detailOrderFoodActivity"
+            app:destination="@id/detailOrderFoodActivity" />
+        <action
+            android:id="@+id/action_orderFoodHomeFragment_to_cartFragment"
+            app:destination="@id/navigation_cart" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.learning.orderfoodappsch3.presentation.ui.profile.ProfileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" />
+    <activity
+        android:id="@+id/detailOrderFoodActivity"
+        android:name="com.learning.orderfoodappsch3.presentation.ui.orderfooddetail.DetailOrderFoodActivity"
+        android:label="activity_detail_order_food"
+        tools:layout="@layout/activity_detail_order_food" />
+    <fragment
+        android:id="@+id/navigation_cart"
+        android:name="com.learning.orderfoodappsch3.presentation.ui.cart.CartFragment"
+        android:label="fragment_cart"
+        tools:layout="@layout/fragment_cart" />
+</navigation>
