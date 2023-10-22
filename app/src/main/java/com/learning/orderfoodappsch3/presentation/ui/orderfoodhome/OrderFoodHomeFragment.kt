@@ -9,63 +9,60 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.learning.orderfoodappsch3.data.database.AppDatabase
-import com.learning.orderfoodappsch3.data.database.datasource.OrderFoodDatabaseDataSource
+import com.chuckerteam.chucker.api.ChuckerInterceptor
+import com.google.firebase.auth.FirebaseAuth
+import com.learning.orderfoodappsch3.R
 import com.learning.orderfoodappsch3.data.datastore.UserPreferenceDataSourceImpl
 import com.learning.orderfoodappsch3.data.datastore.appDataStore
-import com.learning.orderfoodappsch3.data.repository.OrderFoodRepo
-import com.learning.orderfoodappsch3.data.repository.OrderFoodRepoImpl
-import com.learning.orderfoodappsch3.data.sourcedata.CategoryDataSource
-import com.learning.orderfoodappsch3.data.sourcedata.CategoryDataSourceImpl
+import com.learning.orderfoodappsch3.data.network.api.datasource.RestaurantApiDataSource
+import com.learning.orderfoodappsch3.data.network.api.service.RestaurantService
+import com.learning.orderfoodappsch3.data.network.firebase.auth.FirebaseAuthDataSourceImpl
+import com.learning.orderfoodappsch3.data.repository.OrderFoodRepositoryImpl
+import com.learning.orderfoodappsch3.data.repository.UserRepositoryImpl
 import com.learning.orderfoodappsch3.databinding.FragmentOrderFoodHomeBinding
 import com.learning.orderfoodappsch3.model.OrderFood
 import com.learning.orderfoodappsch3.presentation.ui.orderfooddetail.DetailOrderFoodActivity
 import com.learning.orderfoodappsch3.presentation.ui.orderfoodhome.adapter.AdapterLayoutMode
 import com.learning.orderfoodappsch3.presentation.ui.orderfoodhome.adapter.subadapter.CategoriesAdapter
 import com.learning.orderfoodappsch3.presentation.ui.orderfoodhome.adapter.subadapter.OrderFoodAdapter
-import com.learning.orderfoodappsch3.presentation.ui.settings.SettingsDialogFragment
 import com.learning.orderfoodappsch3.utils.GenericViewModelFactory
 import com.learning.orderfoodappsch3.utils.PreferenceDataStoreHelperImpl
 import com.learning.orderfoodappsch3.utils.proceedWhen
 
-class OrderFoodHomeFragment() : Fragment() {
+class OrderFoodHomeFragment : Fragment() {
     private lateinit var binding: FragmentOrderFoodHomeBinding
 
-    val adapter: OrderFoodAdapter by lazy {
+    private val adapter: OrderFoodAdapter by lazy {
         OrderFoodAdapter( modeAdapterLayout = AdapterLayoutMode.LINEAR,
             onListOrderFoodClicked = {
             navigateToDetail(it)
         })
     }
 
-    private val categorydatasource: CategoryDataSource by lazy {
-        CategoryDataSourceImpl()
+    private val categoriesAdapter: CategoriesAdapter by lazy {
+        CategoriesAdapter{
+            viewModel.getOrderFoods(it.nameCategory.lowercase())
+        }
     }
-    private val categoriesAdapter = CategoriesAdapter()
 
     private val viewModel: OrderFoodHomeViewModel by viewModels {
-        val sdc: CategoryDataSource = CategoryDataSourceImpl()
-        val db = AppDatabase.getInstance(requireContext())
-        val ofDao = db.orderfoodDao()
-        val ofDs = OrderFoodDatabaseDataSource(ofDao)
-        val repo: OrderFoodRepo = OrderFoodRepoImpl(ofDs, sdc)
-        val dStore = this.requireContext().appDataStore
-        val dStoreHelper = PreferenceDataStoreHelperImpl(dStore)
-        val userPreferenceDataSource = UserPreferenceDataSourceImpl(dStoreHelper)
-        GenericViewModelFactory.create(OrderFoodHomeViewModel(repo, userPreferenceDataSource))
+        val chucker = ChuckerInterceptor(requireContext())
+        val service = RestaurantService.invoke(chucker)
+        val restoDataSource = RestaurantApiDataSource(service)
+        val repo = OrderFoodRepositoryImpl(restoDataSource)
+        val dataStore = this.requireContext().appDataStore
+        val dataStoreHelper = PreferenceDataStoreHelperImpl(dataStore)
+        val userPrefDataSource = UserPreferenceDataSourceImpl(dataStoreHelper)
+        val firebaseDataSource = FirebaseAuthDataSourceImpl(FirebaseAuth.getInstance())
+        val userRepo = UserRepositoryImpl(firebaseDataSource)
+        GenericViewModelFactory.create(OrderFoodHomeViewModel(repo, userPrefDataSource, userRepo))
     }
 
     private fun navigateToDetail(item: OrderFood) {
         DetailOrderFoodActivity.startActivity(requireContext(), item)
     }
 
-    private fun openSettingsDialog(){
-        SettingsDialogFragment().show(childFragmentManager, null)
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentOrderFoodHomeBinding.inflate(inflater, container, false)
         return binding.root
@@ -73,17 +70,26 @@ class OrderFoodHomeFragment() : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupProfileView()
         setupCategories()
         setupList()
         setupToggleLayout()
         switchMode()
+        observeData()
         fetchData()
+    }
+
+    private fun setupProfileView() {
+        viewModel.userDataLiveData?.fullName?.let { name ->
+            binding.username.text = name
+        } ?: getString(R.string.nisa).let { defaultName ->
+            binding.username.text = defaultName
+        }
     }
 
     private fun setupCategories() {
         binding.rvCategories.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.rvCategories.adapter = categoriesAdapter
-        categoriesAdapter.setItem(categorydatasource.getCategory())
     }
 
     private fun setupList() {
@@ -111,45 +117,72 @@ class OrderFoodHomeFragment() : Fragment() {
     }
 
     private fun switchMode() {
-        binding.btnSwitchGrid.setOnClickListener { switchToGridLayout() }
-        binding.btnSwitchList.setOnClickListener { switchToLinearLayout() }
+        val switchLayout: (Boolean) -> Unit = { isGrid ->
+            viewModel.setListLayoutMenuPref(isGrid)
+        }
+
+        binding.btnSwitchGrid.setOnClickListener { switchLayout(true) }
+        binding.btnSwitchList.setOnClickListener { switchLayout(false) }
     }
 
-    private fun switchToGridLayout() {
-        viewModel.setListLayoutMenuPref(isLayoutGrid = true)
-    }
-
-    private fun switchToLinearLayout() {
-        viewModel.setListLayoutMenuPref(isLayoutGrid = false)
-    }
-
-    private fun fetchData() {
-        viewModel.orderFoodHomeData.observe(viewLifecycleOwner){ item ->
+    private fun observeData() {
+        viewModel.orderFoods.observe(viewLifecycleOwner){ item ->
             val span =
                 if (adapter.modeAdapterLayout == AdapterLayoutMode.LINEAR) 1 else 2
             item.proceedWhen(doOnLoading = {
-                binding.layoutState.root.isVisible = true
-                binding.layoutState.pbLoading.isVisible = true
-                binding.layoutState.tvError.isVisible = false
+                binding.layoutStateOrderFood.root.isVisible = true
+                binding.layoutStateOrderFood.pbLoading.isVisible = true
+                binding.layoutStateOrderFood.tvError.isVisible = false
                 binding.rvFoodMenu.isVisible = false
             }, doOnSuccess = {
-                binding.layoutState.root.isVisible = false
+                binding.layoutStateOrderFood.root.isVisible = false
                 binding.rvFoodMenu.apply {
                     isVisible = true
                     layoutManager = GridLayoutManager(requireContext(), span)
                     adapter = this@OrderFoodHomeFragment.adapter
                 }
-                binding.layoutState.pbLoading.isVisible = false
-                binding.layoutState.tvError.isVisible = false
+                binding.layoutStateOrderFood.pbLoading.isVisible = false
+                binding.layoutStateOrderFood.tvError.isVisible = false
                 item.payload?.let {
                         data -> adapter.submitData(data)
                 }
             }, doOnError = {
-                binding.layoutState.root.isVisible = true
+                binding.layoutStateOrderFood.root.isVisible = true
                 binding.rvFoodMenu.isVisible = false
-                binding.layoutState.pbLoading.isVisible = false
-                binding.layoutState.tvError.isVisible = true
+                binding.layoutStateOrderFood.pbLoading.isVisible = false
+                binding.layoutStateOrderFood.tvError.isVisible = true
             })
         }
+
+        viewModel.categories.observe(viewLifecycleOwner) {
+            it.proceedWhen(
+                doOnSuccess = { result ->
+                    binding.rvCategories.isVisible = true
+                    binding.layoutStateCategory.tvError.isVisible = false
+                    binding.layoutStateCategory.pbLoading.isVisible = false
+
+                    result.payload?.let { category ->
+                        categoriesAdapter.setItem(category)
+                    }
+                },
+                doOnLoading = {
+                    binding.layoutStateCategory.root.isVisible = true
+                    binding.layoutStateCategory.pbLoading.isVisible = true
+                    binding.rvCategories.isVisible = false
+                },
+                doOnError = {
+                    binding.layoutStateCategory.root.isVisible = true
+                    binding.layoutStateCategory.pbLoading.isVisible = false
+                    binding.layoutStateCategory.tvError.isVisible = true
+                    binding.layoutStateCategory.tvError.text = it.exception?.message.orEmpty()
+                    binding.rvCategories.isVisible = false
+                }
+            )
+        }
+    }
+
+    private fun fetchData() {
+        viewModel.getCategories()
+        viewModel.getOrderFoods()
     }
 }

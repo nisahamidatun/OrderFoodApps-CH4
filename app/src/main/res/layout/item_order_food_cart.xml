@@ -36,7 +36,7 @@
             app:layout_constraintBottom_toTopOf="@id/tv_price_food"
             app:layout_constraintStart_toEndOf="@id/iv_order_food"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Pizza Paperoni" />
+            tools:text="@string/pizza_paperoni" />
 
         <TextView
             android:id="@+id/tv_price_food"
@@ -49,7 +49,7 @@
             android:textStyle="bold"
             app:layout_constraintStart_toEndOf="@id/iv_order_food"
             app:layout_constraintTop_toBottomOf="@id/tv_order_food_name"
-            tools:text="22.000" />
+            tools:text="@string/_22_000" />
 
         <TextView
             android:id="@+id/tv_total_order"
@@ -71,7 +71,7 @@
             android:layout_marginTop="4dp"
             android:layout_marginStart="15dp"
             android:gravity="center_vertical"
-            tools:text="Yang enak yaa"
+            tools:text="@string/yang_enak_yaa"
             android:textColor="@color/greyLight"
             android:textSize="12sp"
             app:layout_constraintTop_toBottomOf="@id/tv_price_food"

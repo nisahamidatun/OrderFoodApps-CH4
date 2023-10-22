@@ -8,16 +8,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.learning.orderfoodappsch3.R
 import com.learning.orderfoodappsch3.data.database.AppDatabase
 import com.learning.orderfoodappsch3.data.database.datasource.CartDataSource
-import com.learning.orderfoodappsch3.data.database.datasource.CartDatabaseDataSource
+import com.learning.orderfoodappsch3.data.database.datasource.CartDataSourceImpl
+import com.learning.orderfoodappsch3.data.network.api.datasource.RestaurantApiDataSource
+import com.learning.orderfoodappsch3.data.network.api.service.RestaurantService
 import com.learning.orderfoodappsch3.data.repository.CartRepo
 import com.learning.orderfoodappsch3.data.repository.CartRepoImpl
 import com.learning.orderfoodappsch3.databinding.FragmentCartBinding
 import com.learning.orderfoodappsch3.model.Cart
-import com.learning.orderfoodappsch3.presentation.adapter.CartListAdapter
-import com.learning.orderfoodappsch3.presentation.adapter.CartListener
+import com.learning.orderfoodappsch3.presentation.common.adapter.CartListAdapter
+import com.learning.orderfoodappsch3.presentation.common.adapter.CartListener
 import com.learning.orderfoodappsch3.presentation.ui.checkout.CheckoutActivity
 import com.learning.orderfoodappsch3.utils.GenericViewModelFactory
 import com.learning.orderfoodappsch3.utils.hideKeyboard
@@ -29,8 +32,11 @@ class CartFragment : Fragment() {
     private val viewModel: CartViewModel by viewModels{
         val db = AppDatabase.getInstance(requireContext())
         val cDao = db.cartDao()
-        val dsc: CartDataSource = CartDatabaseDataSource(cDao)
-        val repo: CartRepo = CartRepoImpl(dsc)
+        val cartDataSource: CartDataSource = CartDataSourceImpl(cDao)
+        val chucker = ChuckerInterceptor(requireContext())
+        val service = RestaurantService.invoke(chucker)
+        val apiDataSource = RestaurantApiDataSource(service)
+        val repo: CartRepo = CartRepoImpl(cartDataSource, apiDataSource)
         GenericViewModelFactory.create(CartViewModel(repo))
     }
 
@@ -56,9 +62,7 @@ class CartFragment : Fragment() {
     }
 
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentCartBinding.inflate(inflater, container, false)
         return (binding.root)
@@ -110,7 +114,6 @@ class CartFragment : Fragment() {
     }
 
     private fun setupList(){
-        binding.rvCart.itemAnimator = null
         binding.rvCart.adapter = adapter
     }
 

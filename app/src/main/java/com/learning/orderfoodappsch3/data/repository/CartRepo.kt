@@ -3,36 +3,46 @@ package com.learning.orderfoodappsch3.data.repository
 import com.learning.orderfoodappsch3.data.database.datasource.CartDataSource
 import com.learning.orderfoodappsch3.data.database.entity.CartEntity
 import com.learning.orderfoodappsch3.data.database.mapper.toCartEntity
-import com.learning.orderfoodappsch3.data.database.mapper.toCartOrderFoodList
+import com.learning.orderfoodappsch3.data.database.mapper.toCartList
+import com.learning.orderfoodappsch3.data.network.api.datasource.RestaurantApiDataSource
+import com.learning.orderfoodappsch3.data.network.api.model.order.OrderItemRequest
+import com.learning.orderfoodappsch3.data.network.api.model.order.OrderRequest
 import com.learning.orderfoodappsch3.model.Cart
-import com.learning.orderfoodappsch3.model.CartOrderFood
 import com.learning.orderfoodappsch3.model.OrderFood
 import com.learning.orderfoodappsch3.utils.ResultWrapper
 import com.learning.orderfoodappsch3.utils.proceed
 import com.learning.orderfoodappsch3.utils.proceedFlow
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
 interface CartRepo {
-    fun getDataCartFromUser(): Flow<ResultWrapper<Pair<List<CartOrderFood>, Double>>>
+    fun getDataCartFromUser(): Flow<ResultWrapper<Pair<List<Cart>, Int>>>
     suspend fun createCart(orderFood: OrderFood, quantity: Int): Flow<ResultWrapper<Boolean>>
     suspend fun increaseCart(item: Cart): Flow<ResultWrapper<Boolean>>
     suspend fun decreaseCart(item: Cart): Flow<ResultWrapper<Boolean>>
     suspend fun deleteCart(item: Cart): Flow<ResultWrapper<Boolean>>
     suspend fun setNote(item: Cart): Flow<ResultWrapper<Boolean>>
+    suspend fun order(items: List<Cart>): Flow<ResultWrapper<Boolean>>
+    suspend fun deleteAll()
 }
 
-class CartRepoImpl(private val dataSource: CartDataSource): CartRepo{
-    override fun getDataCartFromUser(): Flow<ResultWrapper<Pair<List<CartOrderFood>, Double>>> {
+class CartRepoImpl(
+    private val dataSource: CartDataSource,
+    private val restaurantApiDataSource: RestaurantApiDataSource
+): CartRepo{
+
+    override suspend fun deleteAll() {
+        dataSource.deleteAll()
+    }
+
+    override fun getDataCartFromUser(): Flow<ResultWrapper<Pair<List<Cart>, Int>>> {
         return dataSource.getAllCart().map {
             proceed {
-                val result = it.toCartOrderFoodList()
+                val result = it.toCartList()
                 val priceTotal = result.sumOf {
-                    val pricePerItem = it.orderFood.foodPrice
-                    val quantity = it.cart.quantityCartItem
+                    val pricePerItem = it.orderfoodPrice
+                    val quantity = it.quantityCartItem
                     pricePerItem * quantity
                 }
                 Pair(result, priceTotal)
@@ -45,7 +55,6 @@ class CartRepoImpl(private val dataSource: CartDataSource): CartRepo{
             }
             .onStart {
                 emit(ResultWrapper.Loading())
-                delay(2000)
             }
     }
 
@@ -53,15 +62,19 @@ class CartRepoImpl(private val dataSource: CartDataSource): CartRepo{
         orderFood: OrderFood,
         quantity: Int
     ): Flow<ResultWrapper<Boolean>> {
-        return orderFood.id?.let {
-            orderfoodId ->
+        return orderFood.foodName.let {
             proceedFlow {
                 val affectedRow = dataSource.insertCart(
-                    CartEntity(orderfoodId = orderfoodId, quantityCartItem = quantity)
+                    CartEntity(
+                        quantityCartItem = quantity,
+                        orderfoodImgUrl = orderFood.imgFood,
+                        orderfoodName = orderFood.foodName,
+                        orderfoodPrice = orderFood.foodPrice
+                    )
                 )
                 affectedRow > 0
             }
-        } ?: flow { emit(ResultWrapper.Error(IllegalStateException("Your Food ID option was not found"))) }
+        }
     }
 
     override suspend fun increaseCart(item: Cart): Flow<ResultWrapper<Boolean>> {
@@ -84,5 +97,19 @@ class CartRepoImpl(private val dataSource: CartDataSource): CartRepo{
 
     override suspend fun setNote(item: Cart): Flow<ResultWrapper<Boolean>> {
         return proceedFlow { dataSource.updateCart(item.toCartEntity()) > 0 }
+    }
+
+    override suspend fun order(items: List<Cart>): Flow<ResultWrapper<Boolean>> {
+        return proceedFlow {
+            val orderItems = items.map {
+                OrderItemRequest(it.orderfoodName, it.orderfoodPrice, it.notes, it.quantityCartItem)
+            }
+            val orderRequest = OrderRequest(
+                username = "username",
+                total = orderItems.map { it.qty?.times((it.price ?: 0)) ?: 0 }.sum(),
+                orders = orderItems
+            )
+            restaurantApiDataSource.createOrder(orderRequest).status == true
+        }
     }
 }

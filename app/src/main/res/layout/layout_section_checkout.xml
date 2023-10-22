@@ -174,7 +174,7 @@
                         android:textAlignment="textEnd"
                         android:textStyle="bold"
                         android:textColor="@color/orange"
-                        tools:text="Rp 20.000" />
+                        tools:text="@string/rp_20_000" />
 
                 </LinearLayout>
             </LinearLayout>

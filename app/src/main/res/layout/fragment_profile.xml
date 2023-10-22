@@ -2,6 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".presentation.ui.profile.ProfileFragment">
@@ -18,14 +19,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Profile"
+            android:text="@string/profile"
             app:layout_constraintBottom_toTopOf="@id/line_header"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/ic_pencil"
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:layout_marginEnd="20dp"
@@ -62,138 +63,15 @@
                 android:id="@+id/img_profile_square"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
+                android:layout_marginTop="25dp"
                 android:src="@drawable/img_profile_square"
                 android:layout_gravity="center"/>
 
-            <TextView
-                android:id="@+id/tv_username"
-                style="@style/TextAppearance.Material3.TitleMedium"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="25dp"
-                android:layout_marginStart="60dp"
-                android:gravity="center"
-                android:text="@string/title_username"
-                android:textColor="@color/greyLight"/>
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardView_username"
-                android:layout_width="300dp"
-                android:layout_height="46dp"
-                android:layout_marginTop="10dp"
-                android:layout_gravity="center_horizontal"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
-
-                <TextView
-                    style="@style/TextAppearance.Material3.TitleMedium"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tv_nisaha_username"
-                    android:textColor="@color/orange"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="24dp" />
-
-            </androidx.cardview.widget.CardView>
-
-            <TextView
-                android:id="@+id/tv_password"
-                style="@style/TextAppearance.Material3.TitleMedium"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="25dp"
-                android:layout_marginStart="60dp"
-                android:gravity="center"
-                android:text="@string/title_password"
-                android:textColor="@color/greyLight"/>
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardView_password"
-                android:layout_width="300dp"
-                android:layout_height="46dp"
-                android:layout_marginTop="10dp"
-                android:layout_gravity="center_horizontal"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
-
-                <TextView
-                    style="@style/TextAppearance.Material3.TitleMedium"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tv_password"
-                    android:textColor="@color/orange"
-                    android:layout_marginStart="24dp"
-                    android:layout_gravity="center_vertical"/>
-
-            </androidx.cardview.widget.CardView>
-
-            <TextView
-                android:id="@+id/tv_email"
-                style="@style/TextAppearance.Material3.TitleMedium"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="25dp"
-                android:layout_marginStart="60dp"
-                android:gravity="center"
-                android:text="@string/title_email"
-                android:textColor="@color/greyLight"/>
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardView_email"
-                android:layout_width="300dp"
-                android:layout_height="46dp"
-                android:layout_marginTop="10dp"
-                android:layout_gravity="center_horizontal"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
-
-                <TextView
-                    style="@style/TextAppearance.Material3.TitleMedium"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tv_email"
-                    android:textColor="@color/orange"
-                    android:layout_marginStart="24dp"
-                    android:layout_gravity="center_vertical"/>
-
-            </androidx.cardview.widget.CardView>
-
-            <TextView
-                android:id="@+id/tv_no_telp"
-                style="@style/TextAppearance.Material3.TitleMedium"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="25dp"
-                android:layout_marginStart="60dp"
-                android:gravity="center"
-                android:text="@string/title_no_telp"
-                android:textColor="@color/greyLight"/>
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardView_no_telp"
-                android:layout_width="300dp"
-                android:layout_height="46dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="50dp"
-                android:layout_gravity="center_horizontal"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
-
-                <TextView
-                    style="@style/TextAppearance.Material3.TitleMedium"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tv_no_telp"
-                    android:textColor="@color/orange"
-                    android:layout_marginStart="24dp"
-                    android:layout_gravity="center_vertical"/>
-
-            </androidx.cardview.widget.CardView>
-
+            <include
+                android:id="@+id/layout_profile"
+                layout="@layout/layout_profile"/>
 
         </LinearLayout>
-
-
 
     </ScrollView>
 

@@ -10,6 +10,7 @@ import com.learning.orderfoodappsch3.R
 import com.learning.orderfoodappsch3.data.datastore.UserPreferenceDataSourceImpl
 import com.learning.orderfoodappsch3.data.datastore.appDataStore
 import com.learning.orderfoodappsch3.databinding.ActivityMainBinding
+import com.learning.orderfoodappsch3.presentation.ui.profile.ProfileFragment
 import com.learning.orderfoodappsch3.utils.GenericViewModelFactory
 import com.learning.orderfoodappsch3.utils.PreferenceDataStoreHelperImpl
 
@@ -29,6 +30,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setBottomNav()
         observeDarkModePref()
+
+        if (intent.getBooleanExtra("open_profile_fragment", false)) {
+            // Navigasi ke ProfileFragment
+            val fragment = ProfileFragment()
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .commit()
+        }
     }
 
     private fun setBottomNav() {

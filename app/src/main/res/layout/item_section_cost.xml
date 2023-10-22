@@ -12,7 +12,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        tools:text="Total Item Price" />
+        tools:text="@string/total_item_price" />
 
     <TextView
         android:id="@+id/tv_item_price"
@@ -22,5 +22,5 @@
         android:textAlignment="textEnd"
         android:textStyle="bold"
         android:textColor="@color/orange"
-        tools:text="Rp 20.000" />
+        tools:text="@string/rp_20_000" />
 </LinearLayout>
