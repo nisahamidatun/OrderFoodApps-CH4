@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("kotlin-parcelize")
     id("com.google.devtools.ksp")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -37,6 +38,17 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
+    }
+
+    flavorDimensions += "env"
+    productFlavors {
+        create("production") {
+            buildConfigField("String", "BASE_URL", "\"https://915335a4-9d73-40f7-9ad1-593d93a026ee.mock.pstmn.io/\"")
+        }
+        create("integration") {
+            buildConfigField("String", "BASE_URL", "\"https://915335a4-9d73-40f7-9ad1-593d93a026ee.mock.pstmn.io/\"")
+        }
     }
 }
 
@@ -68,4 +80,25 @@ dependencies {
     //room database libraries
     implementation("androidx.room:room-ktx:2.5.2")
     ksp("androidx.room:room-compiler:2.5.2")
+
+    //firebase
+    implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation ("com.google.firebase:firebase-auth:22.2.0")
+    implementation ("com.google.firebase:firebase-auth-ktx:22.2.0")
+
+
+    //retrofit & okhttp
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.squareup.okhttp3:okhttp:4.11.0")
+
+    implementation("androidx.legacy:legacy-support-v4:1.0.0")
+    implementation("androidx.cardview:cardview:1.0.0")
+    androidTestImplementation("androidx.test:runner:1.4.0")
+
+    debugImplementation ("com.github.chuckerteam.chucker:library:4.0.0")
+    releaseImplementation ("com.github.chuckerteam.chucker:library-no-op:4.0.0")
+
 }
