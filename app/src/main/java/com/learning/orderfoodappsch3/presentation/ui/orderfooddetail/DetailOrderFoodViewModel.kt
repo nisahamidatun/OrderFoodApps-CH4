@@ -15,14 +15,15 @@ class DetailOrderFoodViewModel(
     private val cartRepo: CartRepo
 ): ViewModel() {
     private val _resultToCart = MutableLiveData<ResultWrapper<Boolean>>()
+    val resultToCart: LiveData<ResultWrapper<Boolean>> get() =_resultToCart
 
     val orderFood = extras?.getParcelable<OrderFood>(DetailOrderFoodActivity.EXTRA_ORDER_FOOD)
 
-    val priceLiveData = MutableLiveData<Double>().apply { postValue(0.0) }
+    val priceLiveData = MutableLiveData<Int>().apply { postValue(0) }
 
     val countOrderLiveData = MutableLiveData<Int>().apply { postValue(0) }
 
-    val resultToCart: LiveData<ResultWrapper<Boolean>> get() =_resultToCart
+
 
 
     fun toCart() {
@@ -30,22 +31,24 @@ class DetailOrderFoodViewModel(
             val foodQuantity =
                 if ((countOrderLiveData.value?: 0)<= 0) 1 else countOrderLiveData.value ?: 0
             orderFood?.let {
-                cartRepo.createCart(it, foodQuantity).collect() { result -> _resultToCart.postValue(result)}
+                cartRepo.createCart(it, foodQuantity).collect { result -> _resultToCart.postValue(result)}
             }
         }
     }
 
     fun plus(){
         val count = (countOrderLiveData.value ?: 0) + 1
+        val pricemenu = orderFood?. foodPrice ?: 0
         countOrderLiveData.postValue(count)
-        priceLiveData.postValue(orderFood?.foodPrice?.times(count) ?: 0.0)
+        priceLiveData.postValue(count * pricemenu)
     }
 
     fun minus(){
         if ((countOrderLiveData.value ?: 0) > 0){
             val count = (countOrderLiveData.value ?: 0) - 1
+            val pricemenu = orderFood?. foodPrice ?: 0
             countOrderLiveData.postValue(count)
-            priceLiveData.postValue(orderFood?.foodPrice?.times(count) ?: 0.0)
+            priceLiveData.postValue(count * pricemenu)
         }
     }
 }

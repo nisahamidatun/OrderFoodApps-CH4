@@ -8,10 +8,13 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
 import coil.load
+import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.learning.orderfoodappsch3.R
 import com.learning.orderfoodappsch3.data.database.AppDatabase
 import com.learning.orderfoodappsch3.data.database.datasource.CartDataSource
-import com.learning.orderfoodappsch3.data.database.datasource.CartDatabaseDataSource
+import com.learning.orderfoodappsch3.data.database.datasource.CartDataSourceImpl
+import com.learning.orderfoodappsch3.data.network.api.datasource.RestaurantApiDataSource
+import com.learning.orderfoodappsch3.data.network.api.service.RestaurantService
 import com.learning.orderfoodappsch3.data.repository.CartRepo
 import com.learning.orderfoodappsch3.data.repository.CartRepoImpl
 import com.learning.orderfoodappsch3.databinding.ActivityDetailOrderFoodBinding
@@ -28,13 +31,15 @@ class DetailOrderFoodActivity : AppCompatActivity() {
     private val viewModel: DetailOrderFoodViewModel by viewModels {
         val db = AppDatabase.getInstance(this)
         val cDao = db.cartDao()
-        val dsc: CartDataSource = CartDatabaseDataSource(cDao)
-        val repo: CartRepo = CartRepoImpl(dsc)
+        val dsc: CartDataSource = CartDataSourceImpl(cDao)
+        val chucker = ChuckerInterceptor(this)
+        val service = RestaurantService.invoke(chucker)
+        val apiDataSource = RestaurantApiDataSource(service)
+        val repo: CartRepo = CartRepoImpl(dsc, apiDataSource)
         GenericViewModelFactory.create(
             DetailOrderFoodViewModel(intent?.extras, repo)
         )
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -62,10 +67,12 @@ class DetailOrderFoodActivity : AppCompatActivity() {
         }
         viewModel.resultToCart.observe(this){
             it.proceedWhen(doOnSuccess = {
-                Toast.makeText(this, "Your food has added to cart", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,
+                    getString(R.string.your_food_has_added_to_cart), Toast.LENGTH_SHORT).show()
                 finish()
             }, doOnError = {
-                Toast.makeText(this, "Your food failed to add to cart", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,
+                    getString(R.string.your_food_failed_to_add_to_cart), Toast.LENGTH_SHORT).show()
             })
         }
     }
