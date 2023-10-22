@@ -8,14 +8,14 @@ fun OrderFoodEntity?.toOrderFood() = OrderFood(
     imgFood = this?.imgFood.orEmpty(),
     foodName = this?.foodName.orEmpty(),
     desc = this?.desc.orEmpty(),
-    foodPrice = this?.foodPrice?: 0.0,
+    foodPrice = this?.foodPrice?: 0,
 )
 
 fun OrderFood?.toOrderFoodEntity() = OrderFoodEntity(
     imgFood = this?.imgFood.orEmpty(),
     foodName = this?.foodName.orEmpty(),
     desc = this?.desc.orEmpty(),
-    foodPrice = this?.foodPrice?: 0.0,
+    foodPrice = this?.foodPrice?: 0,
 ).apply {
     this@toOrderFoodEntity?.id?.let {
         this.id = this@toOrderFoodEntity.id

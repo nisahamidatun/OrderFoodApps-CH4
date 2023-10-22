@@ -5,9 +5,9 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class OrderFood(
-    val id : Int? = null,
-    val imgFood  : String,
-    val foodName : String,
-    val desc : String,
-    val foodPrice : Double
+    val id: Int? = null,
+    val imgFood: String,
+    val foodName: String,
+    val desc: String,
+    val foodPrice: Int
 ) : Parcelable

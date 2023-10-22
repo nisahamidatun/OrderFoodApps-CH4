@@ -39,7 +39,7 @@
             app:layout_constraintBottom_toTopOf="@id/tv_price_food"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/iv_order_food"
-            tools:text="Pizza Paperoni" />
+            tools:text="@string/pizza_paperoni" />
 
 
         <TextView
@@ -55,7 +55,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_order_food_name"
-            tools:text="26.000" />
+            tools:text="@string/_26_000" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

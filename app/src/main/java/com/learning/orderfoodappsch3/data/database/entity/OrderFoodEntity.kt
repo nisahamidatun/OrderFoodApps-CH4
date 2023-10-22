@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity (tableName = "orderfood")
-data class OrderFoodEntity (
+data class OrderFoodEntity(
     @PrimaryKey(autoGenerate = true)
     var id: Int? = 0,
     @ColumnInfo(name = "img_food")
@@ -15,6 +15,6 @@ data class OrderFoodEntity (
     @ColumnInfo(name = "desc")
     val desc: String,
     @ColumnInfo(name = "food_price")
-    val foodPrice: Double,
+    val foodPrice: Int,
 
-)
+    )

@@ -7,13 +7,15 @@ import com.learning.orderfoodappsch3.databinding.ItemLinearCategoriesBinding
 import com.learning.orderfoodappsch3.model.Category
 
 class CategoryViewHolder(
-    private val binding: ItemLinearCategoriesBinding
+    private val binding: ItemLinearCategoriesBinding,
+    val onCategoryClick: (Category) -> Unit
 ): RecyclerView.ViewHolder(binding.root), ViewHolderBinder<Category> {
 
     override fun bind(item: Category) {
-        with(binding){
-            tvCategories.text = item.nameCategory
-            ivCategories.load(item.imgCategory){
+        with(item){
+            itemView.setOnClickListener { onCategoryClick(this) }
+            binding.tvCategories.text = item.nameCategory
+            binding.ivCategories.load(item.imgCategory){
                 crossfade(true)
             }
         }
