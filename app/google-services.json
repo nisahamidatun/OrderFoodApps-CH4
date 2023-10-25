@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "749538946494",
+    "project_id": "hungryfine",
+    "storage_bucket": "hungryfine.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:749538946494:android:ab49fce255d42466549def",
+        "android_client_info": {
+          "package_name": "com.catnip.firebaseauthexample"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA10mTCTy-kYW_eD93WPIgDbdmwzx2-x7Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:749538946494:android:97010d9c321dac8d549def",
+        "android_client_info": {
+          "package_name": "com.learning.orderfoodappsch3"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA10mTCTy-kYW_eD93WPIgDbdmwzx2-x7Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
